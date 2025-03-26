@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Avanzada de Ethers.js con MetaMask</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.6.9/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Demo Avanzada de Ethers.js</h1>
+        <button id="connectButton">Conectar MetaMask</button>
+        <div id="accountInfo" class="hidden">
+            <p id="account"></p>
+            <p id="balance"></p>
+        </div>
+        <div id="sendEther" class="hidden">
+            <h2>Enviar Ether</h2>
+            <input type="text" id="recipient" placeholder="Dirección del destinatario" />
+            <input type="number" id="amount" placeholder="Cantidad de Ether" />
+            <button id="sendButton">Enviar Ether</button>
+            <p id="transactionStatus"></p>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>
