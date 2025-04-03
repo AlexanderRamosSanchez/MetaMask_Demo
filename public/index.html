@@ -1,28 +1,253 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demo Avanzada de Ethers.js con MetaMask</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>CryptoWallet Connect</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Ethers.js -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.6.9/dist/ethers.umd.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
-    <div class="container">
-        <h1>Demo Avanzada de Ethers.js</h1>
-        <button id="connectButton">Conectar MetaMask</button>
-        <div id="accountInfo" class="hidden">
-            <p id="account"></p>
-            <p id="balance"></p>
-        </div>
-        <div id="sendEther" class="hidden">
-            <h2>Enviar Ether</h2>
-            <input type="text" id="recipient" placeholder="Dirección del destinatario" />
-            <input type="number" id="amount" placeholder="Cantidad de Ether" />
-            <button id="sendButton">Enviar Ether</button>
-            <p id="transactionStatus"></p>
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Card principal -->
+                <div class="card mb-4 fade-in">
+                    <div class="card-header text-center">
+                        <h2 class="mb-0"><i class="fas fa-wallet me-2"></i>CryptoWallet Connect</h2>
+                        <p class="text-muted mb-0">Interfaz segura para gestionar tus activos en blockchain</p>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Sección de conexión -->
+                        <div id="connectSection" class="text-center py-4">
+                            <div class="wallet-icon mb-4">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <h3 class="mb-3">Conecta tu Wallet</h3>
+                            <p class="text-muted mb-4">Conecta tu wallet para acceder a todas las funcionalidades</p>
+                            <button id="connectButton" class="btn btn-primary btn-lg">
+                                <i class="fab fa-ethereum me-2"></i>Conectar MetaMask
+                            </button>
+                        </div>
+
+                        <!-- Información de la cuenta (visible después de conectar) -->
+                        <div id="accountInfo" class="hidden fade-in">
+                            <div class="row align-items-center mb-4">
+                                <div class="col-md-6">
+                                    <h4>Cuenta conectada</h4>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="wallet-address" id="account"></div>
+                                        <button id="copyAddress" class="btn btn-sm btn-outline-primary ms-2"
+                                            data-bs-toggle="tooltip" title="Copiar dirección">
+                                            <i class="far fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div id="networkStatus" class="mb-3"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="balance-card">
+                                        <div class="d-flex justify-content-between">
+                                            <h5>Balance Total</h5>
+                                            <button id="refreshBalance" class="btn btn-sm btn-light">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                        <h2 id="balance" class="mb-0 mt-2"></h2>
+                                        <small id="balanceUSD" class="text-white-50"></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Navegación por pestañas -->
+                            <ul class="nav nav-tabs mb-4" id="walletTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="assets-tab" data-bs-toggle="tab"
+                                        data-bs-target="#assets" type="button" role="tab">
+                                        <i class="fas fa-coins me-2"></i>Activos
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="send-tab" data-bs-toggle="tab" data-bs-target="#send"
+                                        type="button" role="tab">
+                                        <i class="fas fa-paper-plane me-2"></i>Enviar
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="history-tab" data-bs-toggle="tab"
+                                        data-bs-target="#history" type="button" role="tab">
+                                        <i class="fas fa-history me-2"></i>Historial
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="settings-tab" data-bs-toggle="tab"
+                                        data-bs-target="#settings" type="button" role="tab">
+                                        <i class="fas fa-cog me-2"></i>Ajustes
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Contenido de las pestañas -->
+                            <div class="tab-content p-3" id="walletTabsContent">
+                                <!-- Tab Activos -->
+                                <div class="tab-pane fade show active" id="assets" role="tabpanel">
+                                    <h4 class="mb-3"><i class="fas fa-coins me-2"></i>Tus Activos</h4>
+                                    <div id="tokensList">
+                                        <div class="token-item">
+                                            <div class="token-icon">ETH</div>
+                                            <div class="token-info">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <h5 class="mb-0">Ethereum</h5>
+                                                        <div class="text-muted small">ETH</div>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <div class="token-balance" id="ethBalance"></div>
+                                                        <div class="token-value" id="ethValue"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="otherTokens"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Tab Enviar -->
+                                <div class="tab-pane fade" id="send" role="tabpanel">
+                                    <h4 class="mb-3"><i class="fas fa-paper-plane me-2"></i>Enviar Tokens</h4>
+                                    <form id="sendForm">
+                                        <div class="mb-3">
+                                            <label for="tokenSelect" class="form-label">Selecciona Token</label>
+                                            <select id="tokenSelect" class="form-select">
+                                                <option value="eth" selected>ETH</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="recipient" class="form-label">Dirección del Destinatario</label>
+                                            <input type="text" class="form-control" id="recipient" placeholder="0x...">
+                                            <div class="invalid-feedback">Dirección inválida</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="amount" class="form-label">Cantidad</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="amount" placeholder="0.0"
+                                                    step="0.0001" min="0">
+                                                <span style="color: white;" class="input-group-text" id="selectedTokenSymbol">ETH</span>
+                                            </div>
+                                            <small id="maxBalance" class="form-text text-muted"></small>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="gasPrice" class="form-label">Gas (Gwei)</label>
+                                            <input type="number" class="form-control" id="gasPrice"
+                                                placeholder="Automático">
+                                            <small class="form-text text-muted">Deja en blanco para gas
+                                                automático</small>
+                                        </div>
+                                        <div id="transactionStatus" class="alert hidden my-3"></div>
+                                        <button type="submit" id="sendButton" class="btn btn-primary w-100">Enviar
+                                            Transacción</button>
+                                    </form>
+                                </div>
+
+                                <!-- Tab Historial -->
+                                <div class="tab-pane fade" id="history" role="tabpanel">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h4><i class="fas fa-history me-2"></i>Historial de Transacciones</h4>
+                                        <button id="refreshHistory" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-sync-alt me-1"></i>Actualizar
+                                        </button>
+                                    </div>
+                                    <div id="loadingTransactions" class="text-center py-4 hidden">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Cargando...</span>
+                                        </div>
+                                        <p class="text-muted mt-2">Cargando transacciones...</p>
+                                    </div>
+                                    <div id="transactionsList"></div>
+                                    <div id="noTransactions" class="text-center py-4 hidden">
+                                        <p class="text-muted">No se encontraron transacciones</p>
+                                    </div>
+                                </div>
+
+                                <!-- Tab Ajustes -->
+                                <div class="tab-pane fade" id="settings" role="tabpanel">
+                                    <h4 class="mb-3"><i class="fas fa-cog me-2"></i>Ajustes</h4>
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h5>Red Actual</h5>
+                                            <p id="currentNetwork" class="mb-2"></p>
+                                            <button id="switchNetworkButton" class="btn btn-outline-primary btn-sm">
+                                                Cambiar Red
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Desconectar Wallet</h5>
+                                                <button id="disconnectButton" class="btn btn-outline-danger">
+                                                    <i class="fas fa-sign-out-alt me-2"></i>Desconectar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Modal para cambiar de red -->
+    <div class="modal fade" id="networkModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cambiar Red</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <button type="button" class="list-group-item list-group-item-action" data-chainid="1">
+                            Ethereum Mainnet
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" data-chainid="17000">
+                            Ethereum Holesky
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" data-chainid="11155111">
+                            Sepolia Testnet
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" data-chainid="42161">
+                            Arbitrum One
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" data-chainid="137">
+                            Polygon
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" data-chainid="56">
+                            BNB Smart Chain
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" data-chainid="10">
+                            Optimism
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle con Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="js/script.js"></script>
 </body>
+
 </html>

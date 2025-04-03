@@ -11,5 +11,13 @@
   "license": "ISC",
   "dependencies": {
     "ethers": "^6.13.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexanderRamosSanchez/MetaMask_Demo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AlexanderRamosSanchez/MetaMask_Demo/issues"
+  },
+  "homepage": "https://github.com/AlexanderRamosSanchez/MetaMask_Demo#readme"
 }
